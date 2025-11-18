@@ -1,41 +1,65 @@
 import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 import { openai } from "@/lib/openai";
-
+import type { UploadedFile } from "@prisma/client";
 
 export async function POST(request: Request) {
-    try {
-        const { message } = await request.json();
+  try {
+    const { message } = await request.json();
 
-        if (!message || typeof message !== "string") {
-            return NextResponse.json({ error: "Message is required" }, { status: 400 });
-        }
-
-        const completion = await openai.chat.completions.create({
-            model: "gpt-5.1",
-            messages: [
-                {
-                    role: "system",
-                    content: "You're a helpful support chatbot for Automation Studio, an AI + automation dashboard. Answer the user's questions about the product and its features in a concise and friendly manner."
-                },
-                {
-                    role: "user",
-                    content: message,
-                },
-            ],
-
-        });
-
-        const response = completion.choices[0]?.message?.content ?? "Sorry, I couldn't generate a response.";
-
-        return NextResponse.json({ response });
-            
-    } catch (error: any) {
-        console.error(error);
-        return NextResponse.json(
-            { error: "An error occurred while processing your request.", details: error?.message ?? String(error), },
-            { status: 500 }
-        );
+    if (!message || typeof message !== "string") {
+      return NextResponse.json(
+        { error: "Message is required" },
+        { status: 400 }
+      );
     }
+
+    // 1) Get uploaded files from DB
+    const files: UploadedFile[] = await prisma.uploadedFile.findMany({
+      orderBy: { uploadedAt: "desc" },
+    });
+
+    const fileIds = files.map((f) => f.fileId);
+
+    // 2) Call the Responses API with file_search
+    const response: any = await openai.responses.create({
+      model: "gpt-5.1",
+      input: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "input_text",
+              text: message,
+            },
+          ],
+        },
+      ],
+      
+        file_id: fileId,
+        tools: [{ type: "file_search" as const }],
+      
+    });
+
+    // 3) Extract the text answer from the response
+    const firstOutput = response.output?.[0];
+    const firstContent = firstOutput?.content?.[0];
+    const textPart = firstContent?.text;
+
+    const reply =
+      typeof textPart === "string"
+        ? textPart
+        : textPart?.value ?? "I couldn’t generate a response.";
+
+    return NextResponse.json({ response: reply });
+  } catch (err: any) {
+    console.error("Chatbot route error:", err);
+    return NextResponse.json(
+      {
+        error: "Something went wrong",
+        details: err?.message ?? String(err),
+      },
+      { status: 500 }
+    );
+  }
 }
-
-
