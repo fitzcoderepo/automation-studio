@@ -19,6 +19,10 @@ export default function DashboardShell({ children }: DashboardShellProps) {
             AI Chatbot
           </Link>
 
+          <Link href="/files" className="text-slate-400 hover:text-white">
+            Files
+          </Link>
+
           <Link href="/automation" className="text-slate-400 hover:text-white">
             Automations
           </Link>

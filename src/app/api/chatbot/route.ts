@@ -22,6 +22,7 @@ export async function POST(request: Request) {
     const fileIds = files.map((f) => f.fileId);
 
     // 2) Call the Responses API with file_search
+    // add file_search tool 
     const response: any = await openai.responses.create({
       model: "gpt-5.1",
       input: [
@@ -35,10 +36,6 @@ export async function POST(request: Request) {
           ],
         },
       ],
-      
-        file_id: fileId,
-        tools: [{ type: "file_search" as const }],
-      
     });
 
     // 3) Extract the text answer from the response
