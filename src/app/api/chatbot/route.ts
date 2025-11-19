@@ -5,7 +5,7 @@ import type { UploadedFile } from "@prisma/client";
 
 export async function POST(request: Request) {
   try {
-    const { message } = await request.json();
+    const { message, conversationId } = await request.json();
 
     if (!message || typeof message !== "string") {
       return NextResponse.json(
@@ -14,14 +14,38 @@ export async function POST(request: Request) {
       );
     }
 
-    // 1) Get uploaded files from DB
+    // get or create conversation
+    let conversation = null;
+
+    if (conversationId && typeof conversationId === "string") {
+      conversation = await prisma.conversation.findUnique({
+        where: { id: conversationId },
+      })
+    }
+
+    if (!conversation) {
+      conversation = await prisma.conversation.create({
+        data: {},
+      });
+    }
+
+    // save user messages to DB
+    await prisma.message.create({
+      data: {
+        role: "user",
+        content: message,
+        conversationId: conversation.id,
+      }
+    })
+
+    // get uploaded files from DB to ready doc-based answering
     const files: UploadedFile[] = await prisma.uploadedFile.findMany({
       orderBy: { uploadedAt: "desc" },
     });
 
     const fileIds = files.map((f) => f.fileId);
 
-    // 2) Call the Responses API with file_search
+    // call the Responses API with file_search
     // add file_search tool 
     const response: any = await openai.responses.create({
       model: "gpt-5.1",
@@ -44,11 +68,20 @@ export async function POST(request: Request) {
     const textPart = firstContent?.text;
 
     const reply =
-      typeof textPart === "string"
-        ? textPart
-        : textPart?.value ?? "I couldn’t generate a response.";
+      typeof textPart === "string" ? textPart : textPart?.value ?? "I couldn't generate a response.";
 
-    return NextResponse.json({ response: reply });
+    // save ai response to DB
+    await prisma.message.create({
+      data: {
+        role: "assistant",
+        content: reply,
+        conversationId: conversation.id,
+      }
+    });
+
+    // return the ai response and conversationId so frontend can keep using the same conversation
+    return NextResponse.json({response: reply, conversationId: conversation.id});
+
   } catch (err: any) {
     console.error("Chatbot route error:", err);
     return NextResponse.json(

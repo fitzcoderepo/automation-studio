@@ -1,19 +1,72 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import DashboardShell from "@/components/dashboard-shell";
 
+type ChatMessage = { role: "user" | "assistant"; content: string };
 
 export default function ChatbotPage() {
+    const searchParams = useSearchParams();
+
     const [messages, setMessages] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
+    const [conversationId, setConversationId] = useState<string | null>(null);
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
+    const [initializing, setInitializing] = useState(true);
 
+    // Load existing conversation if conversationId is in URL
+    useEffect(() => {
+        const convoId = searchParams.get("conversationId");
+
+        if (!convoId) {
+            setInitializing(false);
+            return;
+        }
+
+        // avoid refetch if convo already loaded
+        if (conversationId === convoId) {
+            setInitializing(false);
+            return;
+        }
+
+        // function to fetch existing conversation messages
+        async function loadConversation() {
+            try {
+                const response = await fetch(`/api/conversations/${convoId}`);
+                if (!response.ok) {
+                    setInitializing(false);
+                    return;
+                }
+
+                const data = await response.json();
+
+                setConversationId(data.conversationId);
+                setMessages(
+                    (data.messages ?? []).map((msg: any) => ({
+                        role: msg.role === "user" ? "user" : "assistant",
+                        content: msg.content as string,
+                    }))
+                );
+            } catch (error) {
+                console.error("Error loading conversation:", error);
+            } finally {
+                setInitializing(false);
+            }
+        }
+
+        loadConversation();
+
+    }, [searchParams, conversationId]);
+
+
+    // function to send messages
     async function sendMessage() {
         if (!input.trim()) return;
 
-        // Add user message to chat
+        // Add user message to chat locally
         setMessages((prev) => [...prev, { role: "user", content: input }]);
+
         const userMessage = input;
         setInput("");
         setLoading(true);
@@ -22,10 +75,14 @@ export default function ChatbotPage() {
             const response = await fetch("/api/chatbot", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: userMessage }),
+                body: JSON.stringify({ message: userMessage, conversationId }),
             });
 
             const data = await response.json();
+
+            if (data.conversationId && !conversationId) {
+                setConversationId(data.conversationId);
+            }
 
             // add assistant message to chat
             setMessages((prev) => [...prev, { role: "assistant", content: data.response ?? "No response received." }]);
@@ -59,13 +116,13 @@ export default function ChatbotPage() {
                 const text = await response.text();
                 console.error("Upload failed:", text);
 
-                setMessages((prev) => [...prev,{role: "assistant", content: "❌ File upload failed on the server. Check logs." ,},]);
+                setMessages((prev) => [...prev, { role: "assistant", content: "❌ File upload failed on the server. Check logs.", },]);
                 return;
             }
 
             const data = await response.json();
 
-            setMessages((prev) => [...prev, { role: "assistant", content:  `📄 File uploaded: "${file.name}". "I will now use it when responding."` }]);
+            setMessages((prev) => [...prev, { role: "assistant", content: `📄 File uploaded: "${file.name}". "I will now use it when responding."` }]);
         } catch (error: any) {
             console.error("Upload error:", error);
             setMessages((prev) => [...prev, { role: "assistant", content: "❌ File upload failed. Try again." + (error?.message ?? String(error)) }]);
@@ -75,6 +132,13 @@ export default function ChatbotPage() {
     return (
         <DashboardShell>
             <h1 className="text-2xl font-bold mb-6">AI Chatbot</h1>
+
+            {/* Conversation ID Display */}
+            {conversationId && (
+                <p className="text-xs text-slate-500 mb-2">
+                    Continuing conversation: <span className="font-mono">{conversationId}</span>
+                </p>
+            )}
 
             {/* File Upload */}
             <div className="mb-6">
@@ -89,26 +153,34 @@ export default function ChatbotPage() {
                     onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) uploadFile(file);
-                        e.target.value = ""; 
-
+                        e.target.value = "";
                     }}
                 />
             </div>
 
             {/* Chat Messages */}
             <div className="h-[60vh] overflow-y-auto rounded-lg border border-slate-800 bg-slate-900/50 p-4 mb-4">
-                {messages.map((m, index) => (
-                    <div
-                        key={index}
-                        className={`mb-3 p-3 rounded-lg max-w-[80%] ${m.role === "user"
-                            ? "bg-blue-600 text-white ml-auto"
-                            : "bg-slate-800 text-slate-200"
-                            }`}
-                    >
-                        {m.content}
-                    </div>
-                ))}
+                {initializing && messages.length === 0 ? (
+                    <p className="text-slate-500 text-sm">Loading conversation...</p>
+                ) : messages.length === 0 ? (
+                    <p className="text-slate-500 text-sm">
+                        Start a new conversation by asking a question.
+                    </p>
+                ) : (
+                    messages.map((m, index) => (
+                        <div
+                            key={index}
+                            className={`mb-3 p-3 rounded-lg max-w-[80%] ${m.role === "user"
+                                    ? "bg-blue-600 text-white ml-auto"
+                                    : "bg-slate-800 text-slate-200"
+                                }`}
+                        >
+                            {m.content}
+                        </div>
+                    ))
+                )}
             </div>
+
 
             {/* Input Box */}
             <div className="flex gap-3">
