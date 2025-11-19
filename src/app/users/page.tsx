@@ -1,27 +1,23 @@
 import { prisma } from "@/lib/prisma";
-import type { User } from "@prisma/client"; 
-// prisma auto generates a type for models
+import type { User } from "@prisma/client"; // prisma auto generates a type for models
+import DashboardShell from "@/components/dashboard-shell";
 
-// type User = {
-//     name: string | null;
-//     id: string;
-//     email: string;
-//     createdAt: Date;
+
 
 export default async function UsersPage() {
 
-    const users = await prisma.user.findMany({
-        orderBy: { createdAt: "desc"},
-    });
+  const users = await prisma.user.findMany({
+    orderBy: { createdAt: "desc" },
+  });
 
 
-    return (
-    <main className="min-h-screen p-8 bg-slate-950 text-slate-100">
+  return (
+    <DashboardShell>
       <h1 className="text-2xl font-bold mb-6">Users</h1>
 
-      <div className="rounded-lg border border-slate-800 bg-slate-900/60">
+      <div className="rounded-lg border border-slate-800">
         <table className="min-w-full text-sm">
-          <thead className="border-b border-slate-800 bg-slate-900">
+          <thead className="border-b border-slate-800">
             <tr>
               <th className="px-4 py-2 text-left font-medium">Email</th>
               <th className="px-4 py-2 text-left font-medium">Name</th>
@@ -30,7 +26,7 @@ export default async function UsersPage() {
           </thead>
           <tbody>
             {users.map((user: User) => (
-              <tr key={user.id} className="border-t border-slate-800">
+              <tr key={user.id} className="border-t">
                 <td className="px-4 py-2">{user.email}</td>
                 <td className="px-4 py-2">{user.name ?? "—"}</td>
                 <td className="px-4 py-2">
@@ -43,6 +39,9 @@ export default async function UsersPage() {
           </tbody>
         </table>
       </div>
-    </main>
+
+    </DashboardShell>
+
+
   );
 }

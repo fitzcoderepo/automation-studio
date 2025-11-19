@@ -5,8 +5,8 @@ import { PrismaClient } from "@prisma/client";
 // Available anywhere in the app.
 
 
-const globalForPrisma = globalThis as unknows as {
-    prisma: PrismaClient | udefined;
+const globalForPrisma = globalThis as unknown as {
+    prisma: PrismaClient | undefined;
 
 };
 
