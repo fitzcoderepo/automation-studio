@@ -45,3 +45,27 @@ model Message {
     conversation    Conversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
     conversationId  String
 }
+
+model Automation {
+    id          String   @id @default(cuid())
+    name        String
+    type        String
+    createdAt   DateTime @default(now())
+
+    steps       AutomationStep[]
+}
+
+model AutomationStep {
+    id              String      @id @default(cuid())
+    automation      Automation  @relation(fields: [automationId], references: [id])
+    automationId    String
+
+    // keeping simple string json payloads for now
+    input           String
+    output          String?
+    status          String      @default("None")
+    error           String?
+
+    createdAt       DateTime    @default(now())
+    finishedAt      DateTime?
+}
