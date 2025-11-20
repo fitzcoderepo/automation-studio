@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import DashboardShell from "@/components/dashboard-shell";
+import ConversationSidebar from "@/components/conversation-sidebar";
+import NewChatButton from "@/components/new-chat-btn";
+
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
@@ -14,6 +17,8 @@ export default function ChatbotPage() {
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
     const [initializing, setInitializing] = useState(true);
+    const [isExistingConversation, setIsExistingConversation] = useState(false);
+    const [hasStartedNewConversation, setHasStartedNewConversation] = useState(false);
 
     // Load existing conversation if conversationId is in URL
     useEffect(() => {
@@ -48,6 +53,9 @@ export default function ChatbotPage() {
                         content: msg.content as string,
                     }))
                 );
+
+                setIsExistingConversation(true);
+
             } catch (error) {
                 console.error("Error loading conversation:", error);
             } finally {
@@ -59,7 +67,16 @@ export default function ChatbotPage() {
 
     }, [searchParams, conversationId]);
 
-
+    function handleStartNewChat() {
+        setConversationId(null);
+        setMessages([]);
+        setIsExistingConversation(false);
+        setHasStartedNewConversation(true);
+    }
+    // gate the chat UI to only show when a convo is loaded or a new one has been started
+    const showChatUI = hasStartedNewConversation || !!conversationId;
+    
+    
     // function to send messages
     async function sendMessage() {
         if (!input.trim()) return;
@@ -131,74 +148,118 @@ export default function ChatbotPage() {
 
     return (
         <DashboardShell>
-            <h1 className="text-2xl font-bold mb-6">AI Chatbot</h1>
+            <div className="flex gap-6">
+                {/* Left: conversation list + new chat */}
+                <aside className="w-64 bg-slate-950 border border-slate-800 rounded-lg p-4 flex flex-col h-[70vh]">
+                    <h2 className="text-sm font-semibold text-slate-200 mb-3">
+                        Conversations
+                    </h2>
 
-            {/* Conversation ID Display */}
-            {conversationId && (
-                <p className="text-xs text-slate-500 mb-2">
-                    Continuing conversation: <span className="font-mono">{conversationId}</span>
-                </p>
-            )}
+                    <div className="flex-1 overflow-y-auto">
+                        <ConversationSidebar />
+                    </div>
 
-            {/* File Upload */}
-            <div className="mb-6">
-                <label htmlFor="fileUpload" className="cursor-pointer inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-md border border-slate-700 text-slate-200 text-sm">
-                    📄 Upload File
-                </label>
-                <input
-                    id="fileUpload"
-                    type="file"
-                    accept=".txt,.pdf,.docx,.doc,.xlsx,.xls,.csv"
-                    className="hidden"
-                    onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) uploadFile(file);
-                        e.target.value = "";
-                    }}
-                />
-            </div>
+                    <div className="pt-3 border-t border-slate-800 mt-3">
+                        <NewChatButton onNewChat={handleStartNewChat} />
+                    </div>
+                </aside>
 
-            {/* Chat Messages */}
-            <div className="h-[60vh] overflow-y-auto rounded-lg border border-slate-800 bg-slate-900/50 p-4 mb-4">
-                {initializing && messages.length === 0 ? (
-                    <p className="text-slate-500 text-sm">Loading conversation...</p>
-                ) : messages.length === 0 ? (
-                    <p className="text-slate-500 text-sm">
-                        Start a new conversation by asking a question.
-                    </p>
-                ) : (
-                    messages.map((m, index) => (
-                        <div
-                            key={index}
-                            className={`mb-3 p-3 rounded-lg max-w-[80%] ${m.role === "user"
-                                    ? "bg-blue-600 text-white ml-auto"
-                                    : "bg-slate-800 text-slate-200"
-                                }`}
-                        >
-                            {m.content}
+                {/* Right: existing chat UI */}
+                <div className="flex-1 flex flex-col">
+                    {showChatUI ? (
+                    <>
+                    
+                        <h1 className="text-2xl font-bold mb-4">AI Chatbot</h1>
+
+                        {conversationId && (
+                            <p className="text-xs text-slate-500 mb-3">
+                                {isExistingConversation ? (
+                                    <>
+                                        Continuing conversation:{" "}
+                                        <span className="font-mono">{conversationId}</span>
+                                    </>
+                                ) : (
+                                    "New conversation"
+                                )}
+
+                            </p>
+                        )}
+
+
+                        {/* File Upload */}
+                        <div className="mb-4">
+                            <label
+                                htmlFor="fileUpload"
+                                className="cursor-pointer inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-md border border-slate-700 text-slate-200 text-sm"
+                            >
+                                📄 Upload File
+                            </label>
+                            <input
+                                id="fileUpload"
+                                type="file"
+                                accept=".txt,.pdf,.docx,.doc,.xlsx,.xls,.csv"
+                                className="hidden"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) uploadFile(file);
+                                    e.target.value = "";
+                                }}
+                            />
                         </div>
-                    ))
-                )}
-            </div>
 
+                        {/* Chat Messages */}
+                        <div className="h-[60vh] overflow-y-auto rounded-lg border border-slate-800 bg-slate-900/50 p-4 mb-4">
+                            {initializing && messages.length === 0 ? (
+                                <p className="text-slate-500 text-sm">Loading conversation...</p>
+                            ) : messages.length === 0 ? (
+                                <p className="text-slate-500 text-sm">
+                                    Start a new conversation by asking a question.
+                                </p>
+                            ) : (
+                                messages.map((m, index) => (
+                                    <div
+                                        key={index}
+                                        className={`mb-3 p-3 rounded-lg max-w-[80%] ${m.role === "user"
+                                            ? "bg-blue-600 text-white ml-auto"
+                                            : "bg-slate-800 text-slate-200"
+                                            }`}
+                                    >
+                                        {m.content}
+                                    </div>
+                                ))
+                            )}
+                        </div>
 
-            {/* Input Box */}
-            <div className="flex gap-3">
-                <input
-                    className="flex-1 rounded-md bg-slate-800 border border-slate-700 p-3 text-slate-100"
-                    placeholder="Ask something..."
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-                />
+                        {/* Input Box */}
+                        <div className="flex gap-3">
+                            <input
+                                className="flex-1 rounded-md bg-slate-800 border border-slate-700 p-3 text-slate-100"
+                                placeholder="Ask something..."
+                                value={input}
+                                onChange={(e) => setInput(e.target.value)}
+                                onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                            />
 
-                <button
-                    onClick={sendMessage}
-                    disabled={loading}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md disabled:opacity-50"
-                >
-                    {loading ? "..." : "Send"}
-                </button>
+                            <button
+                                onClick={sendMessage}
+                                disabled={loading}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md disabled:opacity-50"
+                            >
+                                {loading ? "..." : "Send"}
+                            </button>
+                        </div>
+                    </>
+                    ) : (
+                        <div className="flex-1 flex flex-col justify-center items-center">
+                            <h2 className="text-lg font-semibold mb-2 text-slate-200">
+                                Welcome to the Automation Studio Chatbot
+                            </h2>
+                            <p className="text-sm text-slate-400">
+                                Start a new chat or select an existing conversation to begin.
+                            </p>
+                        </div>
+                    )}
+                </div>
             </div>
         </DashboardShell>
     );

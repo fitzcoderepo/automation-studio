@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from "next/link";
 
+
 type DashboardShellProps = React.PropsWithChildren<{}>;
 
 export default function DashboardShell({ children }: DashboardShellProps) {
