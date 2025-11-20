@@ -1,10 +1,13 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import type { Conversation, Message } from "@prisma/client";
 
+type RouteContext = {
+    params: { id: string };
+}
 
 export async function GET(
-    _request: Request,
+    _request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
@@ -41,4 +44,33 @@ export async function GET(
         console.error("Error fetching conversation:", error);
         return NextResponse.json({ error: "Internal Server Error when trying to fetch conversation." }, { status: 500 });
     }
+}
+
+
+export async function DELETE( _request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }) {
+
+      const { id } = await params;
+
+    if (!id || typeof id !== "string") {
+        return NextResponse.json(
+            { error: "Missing or invalid conversation id" },
+            { status: 400 }
+        );
+    }
+
+    try {
+        // messages relation is set to cascade on delete in schema, so deleting conversation will also delete its messages
+        await prisma.conversation.delete({ where: { id }, });
+
+        return NextResponse.json({ success: true});
+
+    } catch (error) {
+        console.error("Error deleting conversation:", error);
+        return NextResponse.json(
+            { error: "Failed to delete conversation" },
+            { status: 500 }
+        );
+    }
+    
 }
