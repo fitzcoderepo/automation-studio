@@ -104,6 +104,8 @@ export default function AutomationPage() {
         }
     }
 
+    const selectedAutomation = automations.find(a => a.id === selectedId);
+
 
     return (
         <DashboardShell>
@@ -160,7 +162,12 @@ export default function AutomationPage() {
                         <>
                             <textarea
                                 className="w-full h-32 rounded-md bg-slate-900 border border-slate-700 p-2 text-xs text-slate-100 mb-3"
-                                placeholder="Paste invoice text here..."
+                                placeholder={
+                                    selectedAutomation?.type === "invoice_extraction" ? "Paste invoice text here..."
+                                    : selectedAutomation?.type === "spreadsheet_summary" ? "Paste spreadsheet text here..."
+                                    : selectedAutomation?.type === "text_summarization" ? "Paste any text to summarize..."
+                                    : "Paste input text here..."
+                                }
                                 value={text}
                                 onChange={(e) => setText(e.target.value)}
                             />

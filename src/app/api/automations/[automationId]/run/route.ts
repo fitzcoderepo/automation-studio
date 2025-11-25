@@ -36,6 +36,10 @@ export async function POST(
         return NextResponse.json({ error: "Automation not found" }, { status: 404 });
     }
 
+
+
+
+
     // create the automation run
     const run = await prisma.automationRun.create({
         data: {
@@ -54,63 +58,98 @@ export async function POST(
             data: { status: "running" },
         });
 
-        const instruction =
-            `You are an AI that extracts structured invoice data from free-form text.
+        async function callOpenAI(instruction: string, text: string) {
+            const aiResponse: any = await openai.responses.create({
+                model: "gpt-5.1",
+                input: [
+                    {
+                        role: "system",
+                        content: [
+                            {
+                                type: "input_text",
+                                text: instruction
+                            },
+                        ],
+                    },
+                    {
+                        role: "user",
+                        content: [
+                            {
+                                type: "input_text",
+                                text: text
+                            },
+                        ],
+                    },
+                ],
+            });
 
-            Return ONLY a JSON object with this exact shape, no extra keys, no comments, no explanations:
+            // extraction
+            const firstOutput = aiResponse.output?.[0];
+            const firstContent = firstOutput?.content?.[0];
+            const textPart = firstContent?.text;
 
-            {
-                "vendor": string | null,
-                "invoiceNumber": string | null,
-                "invoiceDate": string | null,
-                "currency": string | null,
-                "totalAmount": number | null
+            const jsonString = typeof textPart === "string" ? textPart : textPart?.value ?? null;
+
+            if (!jsonString) {
+                throw new Error("No text returned from OpenAI")
             }
-            `;
 
-        const aiResponse: any = await openai.responses.create({
-            model: "gpt-5.1",
-            input: [
-                {
-                    role: "system",
-                    content: [
-                        {
-                            type: "input_text",
-                            text: instruction
-                        },
-                    ],
-                },
-                {
-                    role: "user",
-                    content: [
-                        {
-                            type: "input_text",
-                            text: text
-                        },
-                    ],
-                },
-            ],
-        });
-
-        // extraction
-        const firstOutput = aiResponse.output?.[0];
-        const firstContent = firstOutput?.content?.[0];
-        const textPart = firstContent?.text;
-
-        const jsonString = typeof textPart === "string" ? textPart : textPart?.value ?? null;
-
-        if (!jsonString) {
-            throw new Error("No text returned from OpenAI")
+            try {
+                return JSON.parse(jsonString);
+            } catch (e) {
+                throw new Error("AI did not return valid JSON: " + jsonString);
+            }
         }
 
         let extracted: any;
 
-        try {
-            extracted = JSON.parse(jsonString);
-        } catch (e) {
-            throw new Error("AI did not return valid JSON: " + jsonString);
+        if (automation?.type === "invoice_extraction") {
+            const instruction = `
+                You are an AI that extracts structured invoice data from free-form text.
+
+                Return ONLY a JSON object with this exact shape, no extra keys, no comments, no explanations:
+
+                {
+                    "vendor": string | null,
+                    "invoiceNumber": string | null,
+                    "invoiceDate": string | null,
+                    "currency": string | null,
+                    "totalAmount": number | null
+                }
+                `;
+            extracted = await callOpenAI(instruction, text);
+
+        } else if (automation?.type === "spreadsheet_summary") {
+            const instruction = `
+                You are an AI that analyzes spreadsheet data like CSV and XLSX files.
+
+                Return ONLY a JSON object with this exact shape:
+
+                {
+                    "columns": string[] | null,
+                    "rowCount": number | null,
+                    "summary": string,
+                    "insights": string[]
+                }
+                `;
+            extracted = await callOpenAI(instruction, text);
+        } else if (automation?.type === "text_summarization") {
+            const instruction = `
+                You are an AI that summarizes arbitrary text.
+
+                Return ONLY a JSON object with this exact shape:
+
+                {
+                    "summary": string,
+                    "keyPoints": string[]
+                }
+                `;
+            extracted = await callOpenAI(instruction, text);
+        } else {
+            throw new Error(`Unsupported automation type: ${automation?.type}`);
         }
 
+        // finally styore the results
         finalRun = await prisma.automationRun.update({
             where: { id: run.id },
             data: {
@@ -119,6 +158,7 @@ export async function POST(
                 finishedAt: new Date(),
             },
         });
+
 
 
     } catch (error: any) {
