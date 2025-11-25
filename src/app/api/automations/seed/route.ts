@@ -18,6 +18,10 @@ export async function GET() {
                 type: "text_summarization",
                 name: "Text Summarizer",
             },
+            {
+                type: "csv_importer",
+                name: "CSV Importer",
+            }
         ];
 
         const automations = [];

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import DashboardShell from "@/components/dashboard-shell";
 
 import type { Automation, AutomationRun } from "@prisma/client";
@@ -15,6 +15,7 @@ export default function AutomationPage() {
     const [running, setRunning] = useState(false);
     const [loadingRuns, setLoadingRuns] = useState(false);
     const [expandedRunId, setExpandedRunId] = useState<string | null>(null);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
     // load in automations
     useEffect(() => {
@@ -56,7 +57,41 @@ export default function AutomationPage() {
 
     }, [selectedId]);
 
-    // handle bringing in automation runs
+    // handle file upload and change
+    async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
+        if (!file) { return };
+
+        setSelectedFile(file); // track selected file
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+            const response = await fetch("/api/automations/upload", {
+                method: "POST",
+                body: formData,
+            });
+
+            if (!response.ok) {
+                console.error("File upload failed");
+                return;
+            }
+
+            const data: { text?: string; filename?: string } = await response.json();
+
+            if (data.text) {
+                setText(data.text); // drop file text into textarea
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            // allow reselecting same file
+            e.target.value = "";
+        }
+    }
+
+    // handle automation runs
     async function handleRun() {
         if (!selectedId || !text.trim() || running) { return };
         setRunning(true);
@@ -160,13 +195,42 @@ export default function AutomationPage() {
                         </p>
                     ) : (
                         <>
+                            <div className="mb-3 flex items-center gap-3">
+                                <label className="cursor-pointer inline-flex items-center gap-2 bg-slate-900 border border-slate-700 rounded-md px-3 py-1.5 text-[11px] text-slate-200 hover:bg-slate-800">
+                                    Upload file
+                                    <input
+                                        type="file"
+                                        accept=".csv,.txt"
+                                        className="hidden"
+                                        onChange={handleFile}
+                                    />
+
+                                </label>
+                                {selectedFile && (
+                                    <div className="flex items-center gap-2 mt-2 text-xs text-slate-400">
+                                        <span>{selectedFile.name}</span>
+                                        <button
+                                            onClick={() => {
+                                                setSelectedFile(null);
+                                                setText(""); // clear textarea too, optional
+                                            }}
+                                            className="text-red-400 hover:text-red-300 text-[11px]"
+                                        >
+                                            Remove
+                                        </button>
+                                    </div>
+                                )}
+                                <span className="text-[10px] text-slate-500">
+                                    CSV / text for now
+                                </span>
+                            </div>
                             <textarea
                                 className="w-full h-32 rounded-md bg-slate-900 border border-slate-700 p-2 text-xs text-slate-100 mb-3"
                                 placeholder={
                                     selectedAutomation?.type === "invoice_extraction" ? "Paste invoice text here..."
-                                    : selectedAutomation?.type === "spreadsheet_summary" ? "Paste spreadsheet text here..."
-                                    : selectedAutomation?.type === "text_summarization" ? "Paste any text to summarize..."
-                                    : "Paste input text here..."
+                                        : selectedAutomation?.type === "spreadsheet_summary" ? "Paste spreadsheet text here..."
+                                            : selectedAutomation?.type === "text_summarization" ? "Paste any text to summarize..."
+                                                : "Paste input text here..."
                                 }
                                 value={text}
                                 onChange={(e) => setText(e.target.value)}

@@ -145,6 +145,29 @@ export async function POST(
                 }
                 `;
             extracted = await callOpenAI(instruction, text);
+        } else if (automation?.type === "csv_importer") {
+            const instruction = `
+            You are a CSV parser.
+
+            The user will provide raw separated values. (comma, semicolon)
+            Your job is to return ONLY a strict JSON object like this:
+
+            {
+                "columns": string[],
+                "rows": Array<Record<string, any>>,
+                "rowCount": number
+            }
+
+            Rules:
+            - Detect the delimiter automatically
+            - Trim whitespace
+            - Convert numbers when appropriate
+            - Never return text outside of the JSON object
+            - If CSV is malformed, return an empty "rows" array but still include detected "columns"
+            - Provide helpful feedback if and when errors occur
+            `;
+            extracted = await callOpenAI(instruction, text)
+
         } else {
             throw new Error(`Unsupported automation type: ${automation?.type}`);
         }
