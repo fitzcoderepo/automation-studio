@@ -12,7 +12,7 @@ generator client {
 
 datasource db {
     provider = "postgresql"
-    url = env("DATABASE_URL")
+    /// url now belongs in prisma.config.ts for Prisma v7
 }
 
 model User {
@@ -52,10 +52,10 @@ model Automation {
     type        String
     createdAt   DateTime @default(now())
 
-    steps       AutomationStep[]
+    runs       AutomationRun[]
 }
 
-model AutomationStep {
+model AutomationRun {
     id              String      @id @default(cuid())
     automation      Automation  @relation(fields: [automationId], references: [id])
     automationId    String
