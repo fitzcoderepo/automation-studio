@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import DashboardShell from "@/components/dashboard-shell";
 
 import type { Automation, AutomationRun } from "@prisma/client";
@@ -35,7 +35,39 @@ export default function AutomationPage() {
 
     }, [selectedId]);
 
-    // when automation selection changes, load runs
+    // track what is active selected. If nothing has changed on re-renders, reuse previous value
+    const selectedAutomation = useMemo(
+        () => automations.find(a => a.id === selectedId) ?? null, 
+        [automations, selectedId]
+    );
+
+    // handle automation runs
+    async function handleRun() {
+        if (!selectedId || !text.trim() || running) { return };
+        setRunning(true);
+        try {
+            const response = await fetch(`/api/automations/${selectedId}/run`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text }),
+            });
+
+            if (!response.ok) {
+                console.error("Run failed");
+                return;
+            }
+
+            const newRun: AutomationRun = await response.json();
+            setRuns((prev) => [newRun, ...prev]);
+            setText("");
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setRunning(false);
+        }
+    }
+
+    // when automation selection changes, load previous runs
     useEffect(() => {
         if (!selectedId) { return };
 
@@ -56,6 +88,18 @@ export default function AutomationPage() {
         loadRuns();
 
     }, [selectedId]);
+
+     // handle when re-run selected and use same input
+    function handleReRun(run: AutomationRun) {
+        try {
+            const parsed = JSON.parse(run.input) as { text?: string };
+            if (parsed.text) {
+                setText(parsed.text);
+            }
+        } catch {
+            //
+        }
+    }
 
     // handle file upload and change
     async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
@@ -91,44 +135,7 @@ export default function AutomationPage() {
         }
     }
 
-    // handle automation runs
-    async function handleRun() {
-        if (!selectedId || !text.trim() || running) { return };
-        setRunning(true);
-        try {
-            const response = await fetch(`/api/automations/${selectedId}/run`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ text }),
-            });
-
-            if (!response.ok) {
-                console.error("Run failed");
-                return;
-            }
-
-            const newRun: AutomationRun = await response.json();
-            setRuns((prev) => [newRun, ...prev]);
-            setText("");
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setRunning(false);
-        }
-    }
-
-    // handle when re-run selected and use same input
-    function handleReRun(run: AutomationRun) {
-        try {
-            const parsed = JSON.parse(run.input) as { text?: string };
-            if (parsed.text) {
-                setText(parsed.text);
-            }
-        } catch {
-            //
-        }
-    }
-
+    // make the output somewhat readable
     function prettyJson(str: string | null) {
         if (!str) { return "" };
 
@@ -139,18 +146,15 @@ export default function AutomationPage() {
         }
     }
 
-    const selectedAutomation = automations.find(a => a.id === selectedId);
+   
+
 
 
     return (
         <DashboardShell>
             <h1 className="text-2xl font-bold mb-6">Automations</h1>
 
-
-
-            {/* <div className="grid grid-cols-[260px,1fr] gap-6"> */}
-            <div className="flex gap-6">
-
+            <div className="flex items-start gap-6">
                 {/* Left: automation list */}
                 <aside className="flex-none p-4 bg-slate-950 border border-slate-800 rounded-lg  ">
                     <h2 className="text-sm font-semibold text-slate-200 mb-3">
@@ -165,15 +169,15 @@ export default function AutomationPage() {
                         <ul className="space-y-1">
                             {automations.map((a) => (
                                 <li key={a.id} className="py-1">
+                                
                                     <button
                                         onClick={() => setSelectedId(a.id)}
                                         className={`
-                                            w-full px-2 py-2 rounded-md bg-slate-800 
-                                            hover:cursor-pointer
-                                            hover:bg-slate-100/80 hover:text-slate-950 
-                                            text-center 
-                                            ${selectedId === a.id}
-                                        `}
+                                            w-full px-2 py-2 rounded-md text-xs text-left 
+                                            ${selectedId === a.id 
+                                                ? "bg-slate-800 text-slate-100" 
+                                                : "text-slate-400 hover:bg-slate-900 hover:text-slate-100 hover:cursor-pointer"}
+                                        `} 
                                     >
                                         <div className="font-medium">{a.name}</div>
                                     </button>
@@ -246,10 +250,7 @@ export default function AutomationPage() {
                         </>
                     )}
                 </div>
-                <div>
-
-                </div>
-
+                
                 {/* runs history */}
                 <div className="flex-none bg-slate-950 border border-slate-800 rounded-lg p-4">
                     <h2 className="text-sm font-semibold text-slate-200 mb-3">
