@@ -38,8 +38,6 @@ export async function POST(
 
 
 
-
-
     // create the automation run
     const run = await prisma.automationRun.create({
         data: {
@@ -48,6 +46,7 @@ export async function POST(
             status: "pending"
         }
     });
+    
 
     // move to status=running and call openai
     let finalRun;
@@ -145,11 +144,11 @@ export async function POST(
                 }
                 `;
             extracted = await callOpenAI(instruction, text);
-        } else if (automation?.type === "csv_importer") {
+        } else if (automation?.type === "data_importer") {
             const instruction = `
-            You are a CSV parser.
+            You are a CSV, XLS, XLSX, data-table parser.
 
-            The user will provide raw separated values. (comma, semicolon)
+            The user will provide a file or free-form text with raw separated values. (comma, semicolon)
             Your job is to return ONLY a strict JSON object like this:
 
             {
@@ -163,8 +162,7 @@ export async function POST(
             - Trim whitespace
             - Convert numbers when appropriate
             - Never return text outside of the JSON object
-            - If CSV is malformed, return an empty "rows" array but still include detected "columns"
-            - Provide helpful feedback if and when errors occur
+            - If the file is malformed, return an empty "rows" array but still include detected "columns"
             `;
             extracted = await callOpenAI(instruction, text)
 

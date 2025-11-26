@@ -117,7 +117,7 @@ export default function AutomationPage() {
         }
     }
 
-
+    // handle when re-run selected and use same input
     function handleReRun(run: AutomationRun) {
         try {
             const parsed = JSON.parse(run.input) as { text?: string };
@@ -164,14 +164,14 @@ export default function AutomationPage() {
                     ) : (
                         <ul className="space-y-1">
                             {automations.map((a) => (
-                                <li key={a.id}>
+                                <li key={a.id} className="py-1">
                                     <button
                                         onClick={() => setSelectedId(a.id)}
                                         className={`
                                             w-full px-2 py-2 rounded-md bg-slate-800 
                                             hover:cursor-pointer
                                             hover:bg-slate-100/80 hover:text-slate-950 
-                                            shadow-sm shadow-slate-200 text-xs text-center 
+                                            text-center 
                                             ${selectedId === a.id}
                                         `}
                                     >
@@ -212,7 +212,7 @@ export default function AutomationPage() {
                                         <button
                                             onClick={() => {
                                                 setSelectedFile(null);
-                                                setText(""); // clear textarea too, optional
+                                                setText(""); // clear textarea too
                                             }}
                                             className="text-red-400 hover:text-red-300 text-[11px]"
                                         >
@@ -220,8 +220,9 @@ export default function AutomationPage() {
                                         </button>
                                     </div>
                                 )}
+                                
                                 <span className="text-[10px] text-slate-500">
-                                    CSV / text for now
+                                    .csv/.xls/.xlsx/.txt/.doc/.docx/free-form text
                                 </span>
                             </div>
                             <textarea
@@ -238,7 +239,7 @@ export default function AutomationPage() {
                             <button
                                 onClick={handleRun}
                                 disabled={running || !text.trim()}
-                                className="inline-flex items-center px-3 py-2 rounded-md text-xs font-medium bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
+                                className="inline-flex items-center px-3 py-2 rounded-md text-xs font-medium bg-blue-600  text-white disabled:text-white/30"
                             >
                                 {running ? "Running..." : "Run Automation"}
                             </button>

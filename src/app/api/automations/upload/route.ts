@@ -10,10 +10,14 @@ export async function POST(request: NextRequest) {
         if (!file) {return NextResponse.json({ error: "No file uploaded" }, { status: 400 });}
 
         // for now just handle csv, txt
-        const isTextLike = file.type.endsWith(".csv") || file.type.endsWith(".txt") || file.type.endsWith("xls") || file.type.startsWith("text/");
+        const isTextLike = 
+        file.type.endsWith(".csv") || file.type.endsWith(".txt") || 
+        file.type.endsWith(".doc") || file.type.endsWith(".docx") || 
+        file.type.endsWith("xls") || file.type.endsWith(".tsv") || 
+        file.type.startsWith("text/");
 
         if (!isTextLike) {
-            return NextResponse.json({error: "Only text/.txt/.csv/.xls supported for now" }, { status: 400 });
+            return NextResponse.json({error: "Only text/.txt/.doc/.docx/.csv/.xls/.xlsx supported for now" }, { status: 400 });
         }
 
         const arrayBuffer = await file.arrayBuffer();

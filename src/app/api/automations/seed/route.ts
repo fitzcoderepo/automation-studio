@@ -19,8 +19,8 @@ export async function GET() {
                 name: "Text Summarizer",
             },
             {
-                type: "csv_importer",
-                name: "CSV Importer",
+                type: "data_importer",
+                name: "Data Importer",
             }
         ];
 
