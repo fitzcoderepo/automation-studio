@@ -12,8 +12,8 @@ export default function DashboardShell({ children }: DashboardShellProps) {
         <h2 className="text-xl font-bold text-slate-200 mb-6">Automation Studio</h2>
 
         <nav className="flex flex-col gap-3">
-          <Link href="/users" className="text-slate-400 hover:text-white">
-            Users
+          <Link href="/automations" className="text-slate-400 hover:text-white">
+            Automations
           </Link>
 
           <Link href="/chatbot" className="text-slate-400 hover:text-white">
@@ -28,12 +28,12 @@ export default function DashboardShell({ children }: DashboardShellProps) {
             Files
           </Link>
 
-          <Link href="/automation" className="text-slate-400 hover:text-white">
-            Automations
-          </Link>
-
           <Link href="/inventory" className="text-slate-400 hover:text-white">
             Inventory
+          </Link>
+
+          <Link href="/users" className="text-slate-400 hover:text-white">
+            Users
           </Link>
         </nav>
       </aside>
