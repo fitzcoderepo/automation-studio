@@ -69,3 +69,96 @@ model AutomationRun {
     createdAt       DateTime    @default(now())
     finishedAt      DateTime?
 }
+
+
+// START INVENTORY
+
+model Product {
+    id          Int             @id @default(autoincrement())
+
+    name        String          
+
+    sku         String          @unique() // internal identifier, arbitrary, human-readable, never standardized, stays in org
+    barcode     String          @unique() // auto generated internal code
+
+    productType ProductType @default(MANUFACTURED)
+    
+    dateCreated DateTime        @default(now())
+    dateUpdated DateTime        @updatedAt
+
+    attributes ProductAttribute[]
+
+    barcodes    Barcode[]
+    vendorProducts VendorProduct[]
+
+}
+
+enum ProductType {
+    MANUFACTURED
+    PURCHASED
+    BOTH
+}
+
+model Barcode {
+    id      Int         @id @default(autoincrement())
+    type    String      // RETAIL: "UPC", "EAN", "GS1". INTERNAL: "QR", "Code128", etc
+    value   String
+
+    product    Product @relation(fields: [productId], references: [id])
+    productId  Int
+
+    @@unique([type, value]) // a specific code can't exist twice
+}
+
+model AttributeDefinition {
+    id Int @id @default(autoincrement())
+
+    code String @unique // name of attribute in all caps
+    name String 
+    dateCreated DateTime @default(now())
+
+    productAttributes ProductAttribute[]
+}
+
+model ProductAttribute {
+    id Int @id @default(autoincrement())
+
+    product Product @relation(fields: [productId], references: [id])
+    productId Int
+
+    attribute AttributeDefinition @relation(fields: [attributeId], references: [id])
+    attributeId Int
+
+    value String 
+
+    @@unique([productId, attributeId, value])
+}
+
+model Vendor {
+    id    Int    @id @default(autoincrement())
+    name  String
+    code  String @unique // short code like "TJM"
+
+    dateCreated DateTime @default(now())
+    dateUpdated DateTime @updatedAt
+
+    vendorProducts VendorProduct[]
+}
+
+model VendorProduct {
+    id Int @id @default(autoincrement())
+
+    vendor Vendor @relation(fields: [vendorId], references: [id])
+    vendorId Int
+
+    product Product @relation(fields: [productId], references: [id])
+    productId Int
+
+    vendorSku String? 
+    vendorBarcode String?
+
+    active Boolean @default(true)
+
+    @@unique(name: "unique_vendor_product", [vendorId, productId])
+
+}
