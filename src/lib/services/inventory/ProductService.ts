@@ -1,15 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import { Product, type RawProduct } from "@/lib/domain/inventory/Product";
-import { createDecipheriv } from "crypto";
-import { Prisma } from "@prisma/client";
+import { Prisma, ProductCategory, ProductType } from "@prisma/client";
 
-// type checking
 type AttributeInput = { code: string; value: string };
 
 type CreateProductInput = {
     name: string;
     categoryCode: string;
-    productType?: "MANUFACTURED" | "PURCHASED" | "BOTH";
+    productType: ProductType;
+    productCategory: ProductCategory;
     attributes?: AttributeInput[];
 };
 
@@ -89,7 +88,6 @@ async function generateUniqueSku(input: CreateProductInput) {
 function buildInternalBarcode() {
     return "I" + crypto.randomUUID().replace(/-/g, "").slice(0, 10);
 }
-
 
 async function upsertAttributes(
     tx: Prisma.TransactionClient,
@@ -174,7 +172,7 @@ export class ProductService {
 
         
         return prisma.$transaction(async (tx) => {
-            // sku
+            
             const sku = await generateUniqueSku(input);
             const barcode = buildInternalBarcode();
 
@@ -184,7 +182,8 @@ export class ProductService {
                     name: name.trim(),
                     sku,
                     barcode,
-                    productType: input.productType ?? "MANUFACTURED",
+                    productType: input.productType,
+                    productCategory: input.productCategory,
                 },
                 include: {
                     attributes: { include: { attribute: true } },
@@ -218,6 +217,3 @@ export class ProductService {
         });
     }
 }
-
-
-

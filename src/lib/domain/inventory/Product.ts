@@ -1,12 +1,16 @@
-import type {
+import {
     ProductType,
     ProductCategory,
-    Product as ProductRecord,
-    ProductAttribute as ProductAttributeRecord,
-    AttributeDefinition as AttributeDefinitionRecord,
-    Barcode as BarcodeRecord,
-    VendorProduct as VendorProductRecord,
+    type Product as ProductRecord,
+    type ProductAttribute as ProductAttributeRecord,
+    type AttributeDefinition as AttributeDefinitionRecord,
+    type Barcode as BarcodeRecord,
+    type VendorProduct as VendorProductRecord,
 } from "@prisma/client";
+
+export const PRODUCT_CATEGORIES: ProductCategory[] = Object.values(ProductCategory);
+export const PRODUCT_TYPES: ProductType[] = Object.values(ProductType);
+export { ProductType, ProductCategory };
 
 export type RawProduct = ProductRecord & {
     attributes?: (ProductAttributeRecord & {
@@ -15,8 +19,6 @@ export type RawProduct = ProductRecord & {
     barcodes?: BarcodeRecord[];
     vendorProducts?: VendorProductRecord[];
 };
-
-
 
 
 export class Product {
@@ -49,7 +51,7 @@ export class Product {
     }
 
     get productCategory(): ProductCategory {
-        return this.raw.productCategory ?? "RAW_MATERIAL";
+        return this.raw.productCategory;
     }
 
     get dateCreated() {

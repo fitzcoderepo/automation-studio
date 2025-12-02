@@ -2,6 +2,13 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import {
+  PRODUCT_CATEGORIES,
+  PRODUCT_TYPES,
+  ProductType,
+  ProductCategory,
+} from "@/lib/domain/inventory/Product";
+
 
 type ProductDTO = {
     id: number;
@@ -28,10 +35,10 @@ type ProductDTO = {
 export function ProductClient() {
   const [name, setName] = useState("");
   const [categoryCode, setCategoryCode] = useState("APP");
-  const [productCategory, setProductCategory] = useState("");
+  const [productCategory, setProductCategory] = useState<ProductCategory | "">("");
   const [color, setColor] = useState("");
   const [size, setSize] = useState("");
-  const [productType, setProductType] = useState<"MANUFACTURED" | "PURCHASED" | "BOTH">("MANUFACTURED");
+  const [productType, setProductType] = useState<ProductType | "">("");
 
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState<ProductDTO[]>([]);
@@ -57,7 +64,10 @@ export function ProductClient() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim() || !categoryCode.trim()) return;
+    if (!name.trim() || !categoryCode.trim() || !productType || !productCategory) {
+      setError("Name, category code, product type, and product category are required.");
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -74,6 +84,7 @@ export function ProductClient() {
           name: name.trim(),
           categoryCode: categoryCode.trim(),
           productType,
+          productCategory,
           attributes,
         }),
       });
@@ -129,22 +140,31 @@ export function ProductClient() {
           <select
             className="bg-slate-900 border border-slate-700 rounded-md px-3 py-2 text-sm text-slate-100"
             value={productType}
-            onChange={(e) => setProductType(e.target.value as any)}
+            onChange={(e) => setProductType(e.target.value as ProductType | "")}
           >
-            <option value="MANUFACTURED">Manufactured</option>
-            <option value="PURCHASED">Purchased</option>
-            <option value="BOTH">Both</option>
+            <option value="" disabled>
+              Select type
+            </option>
+            {PRODUCT_TYPES.map((type) => (
+              <option key={type} value={type}>
+                {type.charAt(0) + type.slice(1).toLowerCase()}
+              </option>
+            ))}
           </select>
 
           <select
             className="bg-slate-900 border border-slate-700 rounded-md px-3 py-2 text-sm text-slate-100"
             value={productCategory}
-            onChange={(e) => setProductCategory(e.target.value as any)}
+            onChange={(e) => setProductCategory(e.target.value as ProductCategory | "")}
           >
-            <option value="" disabled className="text-sm text-slate-600">------</option>
-            <option value="RAW_MATERIAL">Raw Material</option>
-            <option value="SUB_COMPONENT">Sub-Component</option>
-            <option value="CONSUMABLE">Consumable</option>
+            <option value="" disabled>
+              Select category
+            </option>
+            {PRODUCT_CATEGORIES.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat.split("_").map((word) => word.charAt(0) + word.slice(1).toLowerCase()).join(" ")}
+              </option>
+            ))}
           </select>
         </div>
 

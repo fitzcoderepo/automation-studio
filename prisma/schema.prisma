@@ -78,7 +78,7 @@ model Product {
     barcode String @unique() // auto generated internal code
 
     productType     ProductType     @default(MANUFACTURED)
-    productCategory ProductCategory?
+    productCategory ProductCategory
 
     dateCreated DateTime @default(now())
     dateUpdated DateTime @updatedAt

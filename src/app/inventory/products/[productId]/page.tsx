@@ -11,7 +11,6 @@ type VendorDTO = {
   vendorBarcode: string | null;
   active: boolean;
 };
-
 type ProductDTO = {
   id: number;
   name: string;
@@ -21,8 +20,6 @@ type ProductDTO = {
   productCategory: string;
   dateCreated: string;
   dateUpdated: string;
-  isManufactured: boolean;
-  isPurchased: boolean;
   label: string;
   attributes: ProductAttributeDTO[];
   vendors: VendorDTO[];
@@ -56,6 +53,14 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
   const dto = product.toDTO() as ProductDTO;
 
+  const productType = dto.productType.toUpperCase();
+
+  const typeOptions = [
+    { label: "Manufactured", value: "MANUFACTURED" },
+    { label: "Purchased", value: "PURCHASED" },
+    { label: "Both", value: "BOTH" },
+  ];
+
   const quantity = dto.quantity;
   const description = dto.description;
 
@@ -87,14 +92,31 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
               <div className="flex items-center justify-between border-b border-slate-900 pb-3">
                 <h2 className="text-sm font-semibold text-slate-200">Overview</h2>
-                <p className="text-xs text-slate-400">Last updated {dto.dateUpdated ? new Date(dto.dateUpdated).toLocaleString() : "recently"}</p>
+                <p className="text-xs font-medium text-slate-400">Last updated {dto.dateUpdated ? new Date(dto.dateUpdated).toLocaleString() : "recently"}</p>
               </div>
               <div className="mt-4 grid gap-3 md:grid-cols-2">
                 <DetailRow label="SKU" value={dto.sku} />
                 <DetailRow label="Barcode" value={dto.barcode} />
-                <DetailRow label="Type" value={dto.productType} />
-                <DetailRow label="Manufactured" value={dto.isManufactured ? "Yes" : "No"} />
-                <DetailRow label="Purchased" value={dto.isPurchased ? "Yes" : "No"} />
+                <div className="flex flex-col gap-1 rounded-lg border border-slate-900 bg-slate-950/60 p-3">
+                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Type</p>
+                  <div className="flex flex-wrap gap-2">
+                    {typeOptions.map((option) => {
+                      const isActive = productType === option.value;
+                      return (
+                        <span
+                          key={option.value}
+                          className={`rounded-full border px-3 py-1 text-xs font-semibold ${
+                            isActive
+                              ? "border-sky-400 bg-sky-400/10 text-sky-50 ring-1 ring-sky-400/40"
+                              : "border-slate-800 bg-slate-900 text-slate-300"
+                          }`}
+                        >
+                          {option.label}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
                 <DetailRow label="Created" value={new Date(dto.dateCreated).toLocaleString()} />
               </div>
             </div>

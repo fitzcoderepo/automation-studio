@@ -1,11 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import { ProductService } from "@/lib/services/inventory/ProductService"
 
-// in ProductService.ts
-// export type CreateProductInput = { ... }
-// then here...
-// const body = (await req.json()) as CreateProductInput;
-// const product = await ProductService.createProduct(body);
 
 export async function POST(request: NextRequest) {
     try {
@@ -16,6 +11,7 @@ export async function POST(request: NextRequest) {
             name: body.name,
             categoryCode: body.categoryCode,
             productType: body.productType,
+            productCategory: body.productCategory,
             attributes: body.attributes,
         });
 
