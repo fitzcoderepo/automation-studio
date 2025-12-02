@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useEffect } from "react";
 
 type ProductDTO = {
@@ -214,7 +215,12 @@ export function ProductClient() {
                     {p.sku}
                   </td>
                   <td className="py-2 pr-4">
-                    <div className="text-slate-100">{p.name}</div>
+                    <Link
+                      href={`/inventory/products/${p.id}`}
+                      className="text-slate-100 hover:text-sky-300"
+                    >
+                      {p.name}
+                    </Link>
                     <div className="text-xs text-slate-500">
                       {p.label}
                     </div>
