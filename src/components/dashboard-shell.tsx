@@ -1,40 +1,51 @@
-import React from 'react';
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 
 type DashboardShellProps = React.PropsWithChildren<{}>;
 
 export default function DashboardShell({ children }: DashboardShellProps) {
-    return (
-       <div className="flex min-h-screen">
+  const pathname = usePathname();
+
+  const navItems = [
+    { href: "/", label: "Home" },
+    { href: "/inventory", label: "Inventory" },
+    { href: "/automations", label: "Automations" },
+    { href: "/chatbot", label: "AI Chatbot" },
+    { href: "/conversations", label: "Conversations" },
+    { href: "/files", label: "Files" },
+    { href: "/users", label: "Users" },
+  ];
+
+  return (
+    <div className="flex min-h-screen">
       {/* Sidebar */}
       <aside className="w-64 bg-slate-950 border-r border-slate-800 p-6">
         <h2 className="text-xl font-bold text-slate-200 mb-6">Automation Studio</h2>
 
         <nav className="flex flex-col gap-3">
-          <Link href="/automations" className="text-slate-400 hover:text-white">
-            Automations
-          </Link>
+          {navItems.map(({ href, label }) => {
+            const isActive =
+              href === "/"
+                ? pathname === "/"
+                : pathname.startsWith(href);
 
-          <Link href="/chatbot" className="text-slate-400 hover:text-white">
-            AI Chatbot
-          </Link>
-
-          <Link href="/conversations" className="text-slate-400 hover:text-white">
-            Conversations
-          </Link>
-
-          <Link href="/files" className="text-slate-400 hover:text-white">
-            Files
-          </Link>
-
-          <Link href="/inventory" className="text-slate-400 hover:text-white">
-            Inventory
-          </Link>
-
-          <Link href="/users" className="text-slate-400 hover:text-white">
-            Users
-          </Link>
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={
+                  isActive
+                    ? "text-white font-medium bg-slate-800 rounded px-3 py-2"
+                    : "text-slate-400 hover:text-white rounded px-3 py-2"
+                }
+              >
+                {label}
+              </Link>
+            );
+          })}
         </nav>
       </aside>
 

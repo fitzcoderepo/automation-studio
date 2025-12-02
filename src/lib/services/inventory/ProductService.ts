@@ -1,7 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { Product, type RawProduct } from "@/lib/domain/inventory/Product";
 import { createDecipheriv } from "crypto";
+import { Prisma } from "@prisma/client";
 
+// type checking
 type AttributeInput = { code: string; value: string };
 
 type CreateProductInput = {
@@ -10,6 +12,8 @@ type CreateProductInput = {
     productType?: "MANUFACTURED" | "PURCHASED" | "BOTH";
     attributes?: AttributeInput[];
 };
+
+
 
 function slugPart(value: string, maxLen: number) {
     return value
@@ -88,6 +92,7 @@ function buildInternalBarcode() {
 
 
 async function upsertAttributes(
+    tx: Prisma.TransactionClient,
     productId: number,
     attributes: AttributeInput[]
 ) {
@@ -99,7 +104,7 @@ async function upsertAttributes(
 
         const attrCode = code.trim().toUpperCase();
 
-        const def = await prisma.attributeDefinition.upsert({
+        const def = await tx.attributeDefinition.upsert({
             where: { code: attrCode },
             update: {},
             create: {
@@ -108,7 +113,7 @@ async function upsertAttributes(
             },
         });
 
-        await prisma.productAttribute.create({
+        await tx.productAttribute.create({
             data: {
                 productId,
                 attributeId: def.id,
@@ -190,7 +195,7 @@ export class ProductService {
 
             // attributes 
             if (input.attributes && input.attributes.length > 0) {
-                await upsertAttributes(created.id, input.attributes);
+                await upsertAttributes(tx, created.id, input.attributes);
 
                 // re-fetch with attributes loaded
                 const final = await tx.product.findUnique({
