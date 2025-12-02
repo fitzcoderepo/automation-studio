@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import DashboardShell from "@/components/dashboard-shell";
 
 import type { Automation, AutomationRun } from "@prisma/client";

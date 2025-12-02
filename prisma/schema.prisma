@@ -4,8 +4,6 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
-
-
 generator client {
     provider = "prisma-client-js"
 }
@@ -23,74 +21,72 @@ model User {
 }
 
 model UploadedFile {
-    id        String   @id @default(cuid())
-    fileId    String 
-    filename  String
+    id         String   @id @default(cuid())
+    fileId     String
+    filename   String
     uploadedAt DateTime @default(now())
 }
 
 model Conversation {
-    id        String   @id @default(cuid())
-    createdAt DateTime @default(now())
-    messages  Message[] 
-
+    id        String    @id @default(cuid())
+    createdAt DateTime  @default(now())
+    messages  Message[]
 }
 
 model Message {
-    id              String        @id @default(cuid())
-    role            String
-    content         String
-    createdAt       DateTime      @default(now())
+    id        String   @id @default(cuid())
+    role      String
+    content   String
+    createdAt DateTime @default(now())
 
-    conversation    Conversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-    conversationId  String
+    conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+    conversationId String
 }
 
 model Automation {
-    id          String   @id @default(cuid())
-    name        String
-    type        String
-    createdAt   DateTime @default(now())
+    id        String   @id @default(cuid())
+    name      String
+    type      String
+    createdAt DateTime @default(now())
 
-    runs       AutomationRun[]
+    runs AutomationRun[]
 }
 
 model AutomationRun {
-    id              String      @id @default(cuid())
-    automation      Automation  @relation(fields: [automationId], references: [id])
-    automationId    String
+    id           String     @id @default(cuid())
+    automation   Automation @relation(fields: [automationId], references: [id])
+    automationId String
 
     // keeping simple string json payloads for now
-    input           String
-    output          String?
-    status          String      @default("None")
-    error           String?
+    input  String
+    output String?
+    status String  @default("None")
+    error  String?
 
-    createdAt       DateTime    @default(now())
-    finishedAt      DateTime?
+    createdAt  DateTime  @default(now())
+    finishedAt DateTime?
 }
-
 
 // START INVENTORY
 
 model Product {
-    id          Int             @id @default(autoincrement())
+    id Int @id @default(autoincrement())
 
-    name        String          
+    name String
 
-    sku         String          @unique() // internal identifier, arbitrary, human-readable, never standardized, stays in org
-    barcode     String          @unique() // auto generated internal code
+    sku     String @unique() // internal identifier, arbitrary, human-readable, never standardized, stays in org
+    barcode String @unique() // auto generated internal code
 
-    productType ProductType @default(MANUFACTURED)
-    
-    dateCreated DateTime        @default(now())
-    dateUpdated DateTime        @updatedAt
+    productType     ProductType     @default(MANUFACTURED)
+    productCategory ProductCategory?
+
+    dateCreated DateTime @default(now())
+    dateUpdated DateTime @updatedAt
 
     attributes ProductAttribute[]
 
-    barcodes    Barcode[]
+    barcodes       Barcode[]
     vendorProducts VendorProduct[]
-
 }
 
 enum ProductType {
@@ -99,13 +95,27 @@ enum ProductType {
     BOTH
 }
 
-model Barcode {
-    id      Int         @id @default(autoincrement())
-    type    String      // RETAIL: "UPC", "EAN", "GS1". INTERNAL: "QR", "Code128", etc
-    value   String
+enum ProductCategory {
+    RAW_MATERIAL
+    SUB_COMPONENT
+    FINISHED_GOOD
 
-    product    Product @relation(fields: [productId], references: [id])
-    productId  Int
+    MAINTENANCE
+    REPAIR
+    OPERATIONS
+
+    PACKAGING
+    CONSUMABLE
+    TOOLING
+}
+
+model Barcode {
+    id    Int    @id @default(autoincrement())
+    type  String // RETAIL: "UPC", "EAN", "GS1". INTERNAL: "QR", "Code128", etc
+    value String
+
+    product   Product @relation(fields: [productId], references: [id])
+    productId Int
 
     @@unique([type, value]) // a specific code can't exist twice
 }
@@ -113,8 +123,8 @@ model Barcode {
 model AttributeDefinition {
     id Int @id @default(autoincrement())
 
-    code String @unique // name of attribute in all caps
-    name String 
+    code        String   @unique // name of attribute in all caps
+    name        String
     dateCreated DateTime @default(now())
 
     productAttributes ProductAttribute[]
@@ -123,21 +133,21 @@ model AttributeDefinition {
 model ProductAttribute {
     id Int @id @default(autoincrement())
 
-    product Product @relation(fields: [productId], references: [id])
+    product   Product @relation(fields: [productId], references: [id])
     productId Int
 
-    attribute AttributeDefinition @relation(fields: [attributeId], references: [id])
+    attribute   AttributeDefinition @relation(fields: [attributeId], references: [id])
     attributeId Int
 
-    value String 
+    value String
 
     @@unique([productId, attributeId, value])
 }
 
 model Vendor {
-    id    Int    @id @default(autoincrement())
-    name  String
-    code  String @unique // short code like "TJM"
+    id   Int    @id @default(autoincrement())
+    name String
+    code String @unique // short code like "TJM"
 
     dateCreated DateTime @default(now())
     dateUpdated DateTime @updatedAt
@@ -148,17 +158,16 @@ model Vendor {
 model VendorProduct {
     id Int @id @default(autoincrement())
 
-    vendor Vendor @relation(fields: [vendorId], references: [id])
+    vendor   Vendor @relation(fields: [vendorId], references: [id])
     vendorId Int
 
-    product Product @relation(fields: [productId], references: [id])
+    product   Product @relation(fields: [productId], references: [id])
     productId Int
 
-    vendorSku String? 
+    vendorSku     String?
     vendorBarcode String?
 
     active Boolean @default(true)
 
     @@unique(name: "unique_vendor_product", [vendorId, productId])
-
 }
