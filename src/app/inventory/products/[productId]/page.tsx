@@ -39,13 +39,16 @@ function DetailRow({ label, value }: { label: string; value: string | number | n
   );
 }
 
-export default async function ProductDetailPage({ params }: { params: { productId: string } }) {
-  const id = Number(params.productId);
-  if (!Number.isFinite(id)) {
+export default async function ProductDetailPage({ params }: { params: Promise<{ productId: string }> }) {
+
+  const { productId: productIdParam } = await params;
+  const productId = Number.parseInt(productIdParam, 10);
+  
+  if (Number.isNaN(productId)) {
     notFound();
   }
 
-  const product = await ProductService.getProductById(id);
+  const product = await ProductService.getProductById(productId);
 
   if (!product) {
     notFound();
