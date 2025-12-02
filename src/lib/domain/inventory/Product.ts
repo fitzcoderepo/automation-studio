@@ -1,5 +1,6 @@
 import type {
     ProductType,
+    ProductCategory,
     Product as ProductRecord,
     ProductAttribute as ProductAttributeRecord,
     AttributeDefinition as AttributeDefinitionRecord,
@@ -47,6 +48,10 @@ export class Product {
         return this.raw.barcode;
     }
 
+    get productCategory(): ProductCategory {
+        return this.raw.productCategory ?? "RAW_MATERIAL";
+    }
+
     get dateCreated() {
         return this.raw.dateCreated;
     }
@@ -54,7 +59,7 @@ export class Product {
     get dateUpdated() {
         return this.raw.dateUpdated;
     }
-    
+
     // give explicit return types for attributes and vendor products
     get attributes(): (ProductAttributeRecord & { attribute: AttributeDefinitionRecord })[] {
         return this.raw.attributes ?? [];
@@ -112,6 +117,7 @@ export class Product {
             sku: this.sku,
             productType: this.productType,
             barcode: this.barcode,
+            productCategory: this.productCategory,
             dateCreated: this.dateCreated.toISOString(),
             dateUpdated: this.dateUpdated.toISOString(),
             isManufactured: this.isManufactured(),

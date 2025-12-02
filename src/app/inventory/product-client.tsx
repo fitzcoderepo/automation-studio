@@ -7,6 +7,7 @@ type ProductDTO = {
     name: string;
     sku: string;
     productType: string;
+    productCategory: string;
     barcode: string;
     dateCreated: string;
     dateUpdated: string;
@@ -26,6 +27,7 @@ type ProductDTO = {
 export function ProductClient() {
   const [name, setName] = useState("");
   const [categoryCode, setCategoryCode] = useState("APP");
+  const [productCategory, setProductCategory] = useState("");
   const [color, setColor] = useState("");
   const [size, setSize] = useState("");
   const [productType, setProductType] = useState<"MANUFACTURED" | "PURCHASED" | "BOTH">("MANUFACTURED");
@@ -84,13 +86,14 @@ export function ProductClient() {
       setProducts((prev) => [created, ...prev]);
 
       setName("");
+      setProductCategory("");
       setColor("");
       setSize("");
 
     } catch (err: any) {
       console.error(err);
       setError(err.message ?? "Failed to create product");
-      
+
     } finally {
       setLoading(false);
     }
@@ -130,6 +133,17 @@ export function ProductClient() {
             <option value="MANUFACTURED">Manufactured</option>
             <option value="PURCHASED">Purchased</option>
             <option value="BOTH">Both</option>
+          </select>
+
+          <select
+            className="bg-slate-900 border border-slate-700 rounded-md px-3 py-2 text-sm text-slate-100"
+            value={productCategory}
+            onChange={(e) => setProductCategory(e.target.value as any)}
+          >
+            <option value="" disabled className="text-sm text-slate-600">------</option>
+            <option value="RAW_MATERIAL">Raw Material</option>
+            <option value="SUB_COMPONENT">Sub-Component</option>
+            <option value="CONSUMABLE">Consumable</option>
           </select>
         </div>
 
@@ -185,6 +199,7 @@ export function ProductClient() {
                 <th className="py-2 text-left">SKU</th>
                 <th className="py-2 text-left">Name</th>
                 <th className="py-2 text-left">Type</th>
+                <th className="py-2 text-left">Category</th>
                 <th className="py-2 text-left">Barcode</th>
                 <th className="py-2 text-left">Attributes</th>
               </tr>
@@ -206,6 +221,9 @@ export function ProductClient() {
                   </td>
                   <td className="py-2 pr-4 text-xs text-slate-400">
                     {p.productType}
+                  </td>
+                  <td className="py-2 pr-4 text-xs text-slate-400">
+                    {p.productCategory}
                   </td>
                   <td className="py-2 pr-4 font-mono text-xs text-slate-300">
                     {p.barcode}
