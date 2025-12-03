@@ -79,11 +79,15 @@ model Product {
 
     productType     ProductType     @default(MANUFACTURED)
     productCategory ProductCategory
+    sellable        Boolean         @default(false)
+    uom             String?
+    onHand          Int             @default(0)
 
     dateCreated DateTime @default(now())
     dateUpdated DateTime @updatedAt
 
     attributes ProductAttribute[]
+    tags       Tag[]
 
     barcodes       Barcode[]
     vendorProducts VendorProduct[]
@@ -107,6 +111,14 @@ enum ProductCategory {
     PACKAGING
     CONSUMABLE
     TOOLING
+}
+
+model Tag {
+    id   Int    @id @default(autoincrement())
+    name String @unique
+    color String
+
+    products Product[]
 }
 
 model Barcode {

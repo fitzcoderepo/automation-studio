@@ -3,12 +3,17 @@ import { Product, type RawProduct } from "@/lib/domain/inventory/Product";
 import { Prisma, ProductCategory, ProductType } from "@prisma/client";
 
 type AttributeInput = { code: string; value: string };
+type TagInput = { name: string; color: string };
 
 type CreateProductInput = {
     name: string;
     categoryCode: string;
-    productType: ProductType;
+    productType?: ProductType;
     productCategory: ProductCategory;
+    sellable?: boolean;
+    uom?: string | null;
+    onHand?: number | null;
+    tags?: TagInput[];
     attributes?: AttributeInput[];
 };
 
@@ -121,6 +126,31 @@ async function upsertAttributes(
     }
 }
 
+function buildTagConnectOrCreate(tags?: TagInput[]) {
+    if (!tags || tags.length === 0) return [];
+
+    const seen = new Set<string>();
+    const connectOrCreate: Prisma.TagCreateOrConnectWithoutProductsInput[] = [];
+
+    for (const tag of tags) {
+        const name = tag.name?.trim();
+        if (!name) continue;
+
+        const normalized = name.toUpperCase();
+        if (seen.has(normalized)) continue;
+        seen.add(normalized);
+
+        const color = tag.color?.trim() || "#666666";
+
+        connectOrCreate.push({
+            where: { name: normalized },
+            create: { name: normalized, color },
+        });
+    }
+
+    return connectOrCreate;
+}
+
 
 
 export class ProductService {
@@ -135,6 +165,7 @@ export class ProductService {
                 },
                 barcodes: true,
                 vendorProducts: true,
+                tags: true,
             },
         });
 
@@ -150,6 +181,7 @@ export class ProductService {
                 },
                 barcodes: true,
                 vendorProducts: true,
+                tags: true,
             },
         });
 
@@ -175,6 +207,7 @@ export class ProductService {
             
             const sku = await generateUniqueSku(input);
             const barcode = buildInternalBarcode();
+            const tagConnectOrCreate = buildTagConnectOrCreate(input.tags);
 
             // create product with barcode and include relations
             const created = await tx.product.create({
@@ -182,13 +215,21 @@ export class ProductService {
                     name: name.trim(),
                     sku,
                     barcode,
-                    productType: input.productType,
+                    productType: input.productType ?? ProductType.MANUFACTURED,
                     productCategory: input.productCategory,
+                    sellable: input.sellable ?? false,
+                    uom: input.uom?.trim() || null,
+                    onHand: input.onHand ?? 0,
+                    tags:
+                        tagConnectOrCreate.length > 0
+                            ? { connectOrCreate: tagConnectOrCreate }
+                            : undefined,
                 },
                 include: {
                     attributes: { include: { attribute: true } },
                     barcodes: true,
                     vendorProducts: true,
+                    tags: true,
                 }
             });
 
@@ -203,6 +244,7 @@ export class ProductService {
                         attributes: { include: { attribute: true } },
                         barcodes: true,
                         vendorProducts: true,
+                        tags: true,
                     },
                 });
 

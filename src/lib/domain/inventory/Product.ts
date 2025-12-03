@@ -1,6 +1,7 @@
 import {
     ProductType,
     ProductCategory,
+    type Tag as TagRecord,
     type Product as ProductRecord,
     type ProductAttribute as ProductAttributeRecord,
     type AttributeDefinition as AttributeDefinitionRecord,
@@ -18,6 +19,7 @@ export type RawProduct = ProductRecord & {
     })[];
     barcodes?: BarcodeRecord[];
     vendorProducts?: VendorProductRecord[];
+    tags?: TagRecord[];
 };
 
 
@@ -54,6 +56,18 @@ export class Product {
         return this.raw.productCategory;
     }
 
+    get uom() {
+        return this.raw.uom ?? null;
+    }
+
+    get onHand() {
+        return this.raw.onHand;
+    }
+
+    get sellable() {
+        return this.raw.sellable;
+    }
+
     get dateCreated() {
         return this.raw.dateCreated;
     }
@@ -69,6 +83,10 @@ export class Product {
 
     get vendorProducts(): VendorProductRecord[] {
         return this.raw.vendorProducts ?? [];
+    }
+
+    get tags(): TagRecord[] {
+        return this.raw.tags ?? [];
     }
 
     // ---- domain logic ----
@@ -120,6 +138,9 @@ export class Product {
             productType: this.productType,
             barcode: this.barcode,
             productCategory: this.productCategory,
+            uom: this.uom,
+            onHand: this.onHand,
+            sellable: this.sellable,
             dateCreated: this.dateCreated.toISOString(),
             dateUpdated: this.dateUpdated.toISOString(),
             isManufactured: this.isManufactured(),
@@ -137,6 +158,11 @@ export class Product {
                 vendorSku: vp.vendorSku,
                 vendorBarcode: vp.vendorBarcode,
                 active: vp.active,
+            })),
+            tags: this.tags.map((tag) => ({
+                id: tag.id,
+                name: tag.name,
+                color: tag.color,
             })),
         };
     }

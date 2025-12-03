@@ -12,6 +12,10 @@ export async function POST(request: NextRequest) {
             categoryCode: body.categoryCode,
             productType: body.productType,
             productCategory: body.productCategory,
+            sellable: body.sellable,
+            uom: body.uom,
+            onHand: body.onHand,
+            tags: body.tags,
             attributes: body.attributes,
         });
 

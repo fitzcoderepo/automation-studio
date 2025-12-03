@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Product" ADD COLUMN     "onHand" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "uom" TEXT;
