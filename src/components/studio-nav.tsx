@@ -4,9 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 
-type DashboardShellProps = React.PropsWithChildren<{}>;
+type StudioNavProps = React.PropsWithChildren<{}>;
 
-export default function DashboardShell({ children }: DashboardShellProps) {
+export default function StudioNav({ children }: StudioNavProps) {
   const pathname = usePathname();
 
   const navItems = [

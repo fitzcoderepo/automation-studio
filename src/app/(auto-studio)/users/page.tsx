@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/prisma";
 import type { User } from "@prisma/client"; // prisma auto generates a type for models
-import DashboardShell from "@/components/dashboard-shell";
 
 
 
@@ -12,7 +11,7 @@ export default async function UsersPage() {
 
 
   return (
-    <DashboardShell>
+    <>
       <h1 className="text-2xl font-bold mb-6">Users</h1>
 
       <div className="rounded-lg border border-slate-800">
@@ -40,7 +39,7 @@ export default async function UsersPage() {
         </table>
       </div>
 
-    </DashboardShell>
+    </>
 
 
   );
