@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { ProductForm } from "../../app/(studio-chrome)/inventory/product-form";
-import { ProductTable } from "../../app/(studio-chrome)/inventory/product-table";
-import type { ProductDTO, TagOption } from "../../app/(studio-chrome)/inventory/product-types";
+import { ProductForm } from "./product-form";
+import { ProductTable } from "./product-table";
+import type { ProductDTO, TagOption } from "./product-types";
 
 export function ProductClient() {
   const [products, setProducts] = useState<ProductDTO[]>([]);

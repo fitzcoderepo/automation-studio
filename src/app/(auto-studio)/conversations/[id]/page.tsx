@@ -1,5 +1,4 @@
 import { prisma } from "@/lib/prisma";
-import DashboardShell from "@/components/studio-nav";
 import type { Conversation, Message } from "@prisma/client";
 
 interface Props {
@@ -13,12 +12,12 @@ export default async function ConversationDetailPage({ params }: Props) {
     // make sure we aren't missing the ID or using an invalid one
     if (!id || typeof id !== "string") {
         return (
-            <DashboardShell>
+            <>
                 <h1 className="text-2xl font-bold mb-6">Conversation Not Found</h1>
                 <p className="text-slate-400 text-sm">
                     No conversation ID was provided in the URL.
                 </p>
-            </DashboardShell>
+            </>
         );
     }
 
@@ -28,12 +27,12 @@ export default async function ConversationDetailPage({ params }: Props) {
 
     if (!conversation) {
         return (
-            <DashboardShell>
+            <>
                 <h1 className="text-2xl font-bold mb-6">Conversation Not Found</h1>
                 <p className="text-slate-400 text-sm">
                     We couldn't find a conversation with this ID.
                 </p>
-            </DashboardShell>
+            </>
         );
     }
 
@@ -43,12 +42,12 @@ export default async function ConversationDetailPage({ params }: Props) {
     });
 
     return (
-        <DashboardShell>
+        <>
             <h1 className="text-2xl font-bold mb-6">
                 Conversation Details
             </h1>
             <p className="text-sm text-slate-400 mb-4">
-                <a href={`/chatbot?conversationId=$[id]`} className="underline hover:text-white">
+                <a href={`/chatbot?conversationId=${id}`} className="underline hover:text-white">
                     Continue with this conversation in the chat interface &gt;
                 </a>
             </p>
@@ -73,6 +72,6 @@ export default async function ConversationDetailPage({ params }: Props) {
                     ))
                 )}
             </div>
-        </DashboardShell>
+        </>
     );
 }
