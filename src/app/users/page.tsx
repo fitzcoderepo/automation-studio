@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { User } from "@prisma/client"; // prisma auto generates a type for models
-import DashboardShell from "@/components/dashboard-shell";
+import DashboardShell from "@/components/studio-nav";
 
 
 

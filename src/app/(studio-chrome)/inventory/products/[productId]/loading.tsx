@@ -1,4 +1,4 @@
-import DashboardShell from "@/components/dashboard-shell";
+import DashboardShell from "@/components/studio-nav";
 import { LoadingState } from "@/components/async-state";
 
 export default function LoadingProduct() {

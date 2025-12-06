@@ -1,5 +1,5 @@
-import DashboardShell  from "@/components/dashboard-shell";
-import { ProductClient } from "@/app/inventory/product-client"
+import DashboardShell  from "@/components/studio-nav";
+import { ProductClient } from "@/features/inventory/product-client"
 
 
 export default function InventoryPage() {

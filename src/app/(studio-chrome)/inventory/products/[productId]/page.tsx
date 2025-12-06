@@ -1,4 +1,4 @@
-import DashboardShell from "@/components/dashboard-shell";
+import DashboardShell from "@/components/studio-nav";
 import { ProductService } from "@/lib/services/inventory/ProductService";
 import Link from "next/link";
 import { notFound } from "next/navigation";

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import DashboardShell from "@/components/dashboard-shell";
+import DashboardShell from "@/components/studio-nav";
 import ConversationSidebar from "@/components/conversation-sidebar";
 import NewChatButton from "@/components/new-chat-btn";
 

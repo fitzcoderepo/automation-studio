@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import DashboardShell from "@/components/dashboard-shell";
+import DashboardShell from "@/components/studio-nav";
 import type { Conversation, Message } from "@prisma/client";
 
 interface Props {
