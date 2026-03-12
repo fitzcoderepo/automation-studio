@@ -50,7 +50,7 @@ async function main() {
     lines.push("");
 
     const output = lines.join("\n");
-    const readmePath = path.join(docsDir, "README.md");
+    const readmePath = path.join(".", "README.md");
 
     try {
         await fs.writeFile(readmePath, output, "utf8");
