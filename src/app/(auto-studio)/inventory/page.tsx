@@ -4,10 +4,7 @@ export default function InventoryPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-slate-100">Products</h1>
-        <p className="text-sm text-slate-400">
-          Create products and verify the ProductService + API wiring.
-        </p>
+        <h1 className="text-xs font-bold text-slate-100">Inventory</h1>
       </div>
 
       <ProductClient />

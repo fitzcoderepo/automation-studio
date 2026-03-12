@@ -2,11 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { openai } from "@/lib/openai";
 
-
+interface Props {
+    params: Promise<{automationId: string}>
+}
 
 export async function POST(
     request: NextRequest,
-    { params }: { params: Promise<{ automationId: string }> }
+    { params }: Props
 ) {
     // unwrap async parameters
     const { automationId } = await params;

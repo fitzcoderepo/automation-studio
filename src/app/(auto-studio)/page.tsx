@@ -20,30 +20,12 @@ export default function HomePage() {
             Automation Studio
           </h1>
           <p className="mt-2 max-w-xl text-sm muted">
-            Internal AI tools, automations, and inventory in one place.
-            Use this dashboard as your control center while you build
-            out the rest of the system.
+            Internal AI tools, automations in one place.
           </p>
-        </div>
-
-        <div className="flex gap-3">
-          <Link
-            href="/chatbot"
-            className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium btn-accent"
-          >
-            Open AI Chatbot
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-          <Link
-            href="/automations"
-            className="inline-flex items-center gap-2 rounded-lg border-subtle px-4 py-2 text-sm font-medium"
-          >
-            View Automations
-          </Link>
         </div>
       </section>
 
-      {/* Quick nav cards */}
+      {/* nav cards */}
       <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <HomeCard
           href="/chatbot"
@@ -88,24 +70,24 @@ export default function HomePage() {
         />
       </section>
 
-      {/* Getting started checklist */}
+      {/*  */}
       <section className="rounded-xl panel p-4">
         <h2 className="text-sm font-semibold">
-          Getting started
+          TODO
         </h2>
         <ul className="mt-3 space-y-2 text-sm muted">
           <li className="flex items-start gap-2">
             <span className="mt-[5px] h-2 w-2 rounded-full bg-emerald-500" />
             <span>
-              Create a test product in{" "}
+              Continue building out the {" "}
               <Link href="/inventory" className="text-sky-400 hover:underline">
                 Inventory
               </Link>{" "}
-              and confirm SKU / barcode generation looks right.
+              system.
             </span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="mt-[5px] h-2 w-2 rounded-full bg-sky-500" />
+            <span className="mt-[5px] h-2 w-2 rounded-full bg-emerald-500" />
             <span>
               Seed and run an automation from{" "}
               <Link href="/automations" className="text-sky-400 hover:underline">
@@ -115,7 +97,7 @@ export default function HomePage() {
             </span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="mt-[5px] h-2 w-2 rounded-full bg-slate-500" />
+            <span className="mt-[5px] h-2 w-2 rounded-full bg-emerald-500" />
             <span>
               Use the{" "}
               <Link href="/chatbot" className="text-sky-400 hover:underline">

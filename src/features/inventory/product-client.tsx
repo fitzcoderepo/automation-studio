@@ -55,7 +55,7 @@ export function ProductClient() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold">Products</h2>
-          <p className="text-sm muted">Create and manage products. Existing items stay visible while you add new ones.</p>
+          <p className="text-sm muted">Create and manage products.</p>
         </div>
         <button
           type="button"
@@ -63,9 +63,9 @@ export function ProductClient() {
             setError(null);
             setShowForm(true);
           }}
-          className="group relative inline-flex items-center gap-2 rounded-full border-subtle bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm transition hover:-translate-y-[1px] hover:shadow-md"
+          className="group relative inline-flex items-center gap-2 rounded-full border-subtle bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm transition hover:-translate-y-px hover:shadow-xl cursor-pointer"
         >
-          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 text-white text-xs shadow">
+          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-cyan-500 text-white text-xs shadow">
             +
           </span>
           <span>Add product</span>
