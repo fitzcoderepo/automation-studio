@@ -1,26 +1,110 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #f8fafc; /* page background */
+  --surface: #f1f5f9; /* cards/panels (slate-100) */
+  --surface-muted: #e2e8f0; /* subtle surfaces (slate-200) */
+  --border: #cbd5e1; /* slate-300 */
+  --text: #0f172a; /* slate-900 */
+  --text-muted: #475569; /* slate-600 */
+  --accent: #2563eb; /* blue-600 */
+  --accent-strong: #1d4ed8; /* blue-700 */
+  --accent-contrast: #ffffff;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--bg);
+  --color-foreground: var(--text);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body {
+  background: var(--bg);
+  color: var(--text);
 }
 
-/* body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-} */
+.theme-shell {
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.panel-muted {
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+.accent {
+  color: var(--accent-strong);
+}
+
+.btn-accent {
+  background: linear-gradient(135deg, var(--accent-strong), var(--accent));
+  color: var(--accent-contrast);
+}
+
+.danger {
+  color: #dc2626;
+}
+
+.nav-surface {
+  background-color: #0f172a;
+  color: #e2e8f0;
+  border-right: 1px solid #1f2937;
+}
+
+.nav-link {
+  color: #cbd5e1;
+}
+
+.nav-link:hover {
+  color: #ffffff;
+}
+
+.nav-link-active {
+  color: #ffffff;
+  background-color: #111827;
+  border-radius: 8px;
+}
+
+/* Normalize old slate/neutral utility colors to the base theme */
+[class*="bg-slate"], .bg-white, .bg-black {
+  background-color: var(--surface-muted) !important;
+}
+
+[class*="text-slate"], .text-white, .text-black {
+  color: inherit !important;
+}
+
+[class*="border-slate"], .border-white, .border-black {
+  border-color: var(--border) !important;
+}
+
+/* Tables default to light slate surfaces */
+table {
+  background-color: var(--surface);
+  border-color: var(--border);
+}
+
+th, td {
+  background-color: var(--surface);
+  border-color: var(--border);
+}
+
+thead {
+  background-color: var(--surface-muted);
+}
+
+.border-subtle {
+  border: 1px solid var(--border);
+}

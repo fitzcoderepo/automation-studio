@@ -67,6 +67,30 @@ model AutomationRun {
     finishedAt DateTime?
 }
 
+// START SCHEMA BUILDER
+
+model Builder {
+    id        String       @id @default(cuid())
+    name      String
+    type      String
+    createdAt DateTime     @default(now())
+    runs      BuilderRun[]
+}
+
+model BuilderRun {
+    id        String  @id @default(cuid())
+    builder   Builder @relation(fields: [builderId], references: [id])
+    builderId String
+
+    input  String
+    output String?
+    status String  @default("pending") 
+    error  String?
+
+    createdAt  DateTime  @default(now())
+    finishedAt DateTime?
+}
+
 // START INVENTORY
 
 model Product {
@@ -114,8 +138,8 @@ enum ProductCategory {
 }
 
 model Tag {
-    id   Int    @id @default(autoincrement())
-    name String @unique
+    id    Int    @id @default(autoincrement())
+    name  String @unique
     color String
 
     products Product[]

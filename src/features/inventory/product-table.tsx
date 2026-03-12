@@ -245,7 +245,7 @@ export function ProductTable({ products, availableTags, onRefresh }: ProductTabl
               <tr>
                 <td colSpan={10} className="py-6 text-center text-sm text-slate-500">
                   {products.length === 0
-                    ? "No products yet. Create one above to test the service + API."
+                    ? "No products yet."
                     : "No products match the current filters."}
                 </td>
               </tr>
