@@ -1,6 +1,6 @@
 # Documentation Index
 
-Generated automatically by generate-docs-index.mjs on 2025-11-26T22:41:59.110Z
+Generated automatically by generate-docs-index.mjs on 2026-03-12T22:27:24.085Z
 
 - [ARCHITECTURE_OVERVIEW](./ARCHITECTURE_OVERVIEW.md)
 - [AUTOMATION_UI](./AUTOMATION_UI.md)
@@ -9,5 +9,10 @@ Generated automatically by generate-docs-index.mjs on 2025-11-26T22:41:59.110Z
 - [DASHBOARD_SHELL_LAYOUT](./DASHBOARD_SHELL_LAYOUT.md)
 - [DATA_MODELS_PRISMA](./DATA_MODELS_PRISMA.md)
 - [FILE_UPLOADS](./FILE_UPLOADS.md)
+- [HOME_PAGE](./HOME_PAGE.md)
+- [INVENTORY_API](./INVENTORY_API.md)
+- [INVENTORY_DOMAIN](./INVENTORY_DOMAIN.md)
+- [INVENTORY_UI](./INVENTORY_UI.md)
 - [OPENAI_INTEGRATION](./OPENAI_INTEGRATION.md)
+- [PRODUCT_SERVICE](./PRODUCT_SERVICE.md)
 - [ROADMAP_TODO](./ROADMAP_TODO.md)
