@@ -10,6 +10,13 @@ It is designed with a focus on flexibility, modularity, and secure data handling
 
 ---
 
+## Example
+
+- Receive webhook from external service  
+- Process payload asynchronously  
+- Trigger automation logic (e.g., file processing or AI task)  
+- Store results and return response  
+
 ## Tech Stack
 
 - **Backend:** Next.js (Server Components)
